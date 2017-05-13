@@ -10,19 +10,62 @@ using MVC5Course.Models;
 
 namespace MVC5Course.Controllers
 {
-    public class ProductsController : Controller
+    /// <summary>
+    /// 說明此程式
+    /// 
+    /// </summary>
+    public class ProductsController : BaseController
     {
-        private FabricsEntities db = new FabricsEntities();
-
+        //private FabricsEntities db = new FabricsEntities();  //Object services
+       // ProductRepository repo = RepositoryHelper.GetProductRepository();
+        public ActionResult CreateProduct()
+        {
+            return View();
+        }
+        [HttpPost]
+        public ActionResult CreateProduct(ProductListVMController data)
+        {
+            
+            if(ModelState.IsValid)
+            {
+                return RedirectToAction("ListProducts");
+     
+            }
+            return View();
+        }
         // GET: Products
+        public ActionResult ListProducts()
+        {
+            //var data = db.Product
+            //.Where(p => p.Active.HasValue )
+            //.OrderByDescending(p => p.ProductName)
+            //.Take(20);
+
+
+            //var data = repo.GetProduct列表所有資料(true)
+            //    .Select(p => new ProductListVM()
+            //    {
+            //        ProductId = p.ProductId;
+
+            //    }
+            return null;
+            //return View(data);
+        }
         public ActionResult Index(bool Active = true)
         {
             // return View(db.Product.ToList());
             // return View(db.Product.OrderBy(p=>p.ProductId).Take(10));
-            var data = db.Product
-                .Where(p => p.Active.HasValue && p.Active.Value == Active)
-                .OrderByDescending(p => p.ProductName)
-                .Take(20);
+
+
+            //var data = db.Product
+            //    .Where(p => p.Active.HasValue && p.Active.Value == Active)
+            //    .OrderByDescending(p => p.ProductName)
+            //    .Take(20);
+
+            //var data = repo.All()
+            //    .Where(p => p.Active.HasValue && p.Active.Value == Active)
+            //    .OrderByDescending(p => p.ProductId).Take(10);
+            var data = repo.GetProduct列表所有資料(Active, showAll: true);
             return View(data);
         }
 
@@ -33,7 +76,8 @@ namespace MVC5Course.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Product product = db.Product.Find(id);
+            //Product product = db.Product.Find(id);
+            Product product = repo.Get單筆資料ByProductId(id.Value);
             if (product == null)
             {
                 return HttpNotFound();
@@ -56,8 +100,10 @@ namespace MVC5Course.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Product.Add(product);
-                db.SaveChanges();
+                //db.Product.Add(product);
+                //db.SaveChanges();
+                repo.Add(product);
+                repo.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
 
@@ -71,7 +117,8 @@ namespace MVC5Course.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Product product = db.Product.Find(id);
+            //Product product = db.Product.Find(id);
+            Product product = repo.Get單筆資料ByProductId(id.Value);
             if (product == null)
             {
                 return HttpNotFound();
@@ -88,46 +135,64 @@ namespace MVC5Course.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Entry(product).State = EntityState.Modified;
-                db.SaveChanges();
+                //db.Entry(product).State = EntityState.Modified;
+                //db.SaveChanges();
+                repo.Update(product);
+                repo.UnitOfWork.Commit();
                 return RedirectToAction("Index");
             }
             return View(product);
         }
 
-        // GET: Products/Delete/5
-        public ActionResult Delete(int? id)
+        public ActionResult Delete(int?id)
         {
             if (id == null)
-            {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Product product = db.Product.Find(id);
-            if (product == null)
-            {
-                return HttpNotFound();
-            }
+            Product product = repo.Get單筆資料ByProductId(id.Value);
+            if (product == null) return HttpNotFound();
             return View(product);
         }
+
+        // GET: Products/Delete/5
+        //public ActionResult Delete(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+        //    }
+        //    //Product product = db.Product.Find(id);
+        //    Product product = repo.Get單筆資料ByProductId(id.Value);
+        //    if (product == null)
+        //    {
+        //        return HttpNotFound();
+        //    }
+        //    return View(product);
+        //}
 
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Product product = db.Product.Find(id);
-            db.Product.Remove(product);
-            db.SaveChanges();
+            //Product product = db.Product.Find(id);
+            //db.Product.Remove(product);
+            //db.SaveChanges();
+            Product product = repo.Get單筆資料ByProductId(id);
+            repo.Delete(product);
+
+            
+
+            repo.UnitOfWork.Commit();
             return RedirectToAction("Index");
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
     }
 }

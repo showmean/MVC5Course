@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace MVC5Course.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         public ActionResult Index()
         {
@@ -35,5 +35,20 @@ namespace MVC5Course.Controllers
             return View();
         }
 
+        public ActionResult PartialAbout()
+        {
+            ViewBag.Message = "TEST";
+            if (Request.IsAjaxRequest()) return PartialView("About");
+            else          return View("About");
+           // return View();
+        }
+        public ActionResult SomeAction()
+        {
+            return PartialView("SuccessRedirect", "/");
+        }
+        public ActionResult Unknown()
+        {
+            return View();
+        }
     }
 }
